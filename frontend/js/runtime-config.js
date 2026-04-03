@@ -1,1 +1,1 @@
-window.__API_BASE__ = window.__API_BASE__ || "http://localhost:8001";
+window.__API_BASE__ = "https://spacesync-mhvz.onrender.com";
