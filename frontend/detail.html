@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Space Detail — SpaceSync</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    .detail-layout { display: grid; grid-template-columns: 1fr 360px; gap: 1.5rem; max-width: 1180px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .hero-img { width: 100%; height: 360px; object-fit: cover; border-radius: 14px; background: var(--bg-raised); display: flex; align-items: center; justify-content: center; font-size: 5rem; }
+    .hero-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
+    .space-title { font-family: var(--font-head); font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; margin: 1rem 0 0.3rem; }
+    .book-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; position: sticky; top: 80px; height: fit-content; }
+    .price-display { display: flex; align-items: baseline; gap: 0.5rem; margin: 0.8rem 0; }
+    .price-big { font-family: var(--font-head); font-size: 2rem; font-weight: 800; }
+    .price-base { text-decoration: line-through; color: var(--muted); font-size: 1rem; }
+    .price-surge-label { font-size: 0.78rem; color: var(--accent); font-weight: 600; }
+    .avail-section { background: var(--bg-raised); border-radius: 8px; padding: 0.8rem; margin: 0.8rem 0; }
+    .reviews-section { margin-top: 2.5rem; }
+    .review-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 0.8rem; }
+    .review-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; }
+    .recs-section { margin-top: 2.5rem; }
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+    #map { height: 220px; border-radius: var(--radius); border: 1px solid var(--border); margin-top: 1rem; }
+    .razorpay-note { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 0.5rem; }
+    @media (max-width: 900px) { .detail-layout { grid-template-columns: 1fr; } .book-card { position: static; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">Space<span>Sync</span></a>
+  <div class="nav-links">
+    <a href="listing.html">Browse</a>
+    <a href="#" id="nav-dashboard" class="hidden">Dashboard</a>
+    <a href="user-profile.html" id="nav-profile" class="hidden">Profile</a>
+    <a href="#" id="nav-login-btn">Login</a>
+    <a href="#" id="nav-register-btn" class="btn btn-primary btn-sm">Sign Up</a>
+    <span id="nav-user" class="hidden" style="color:var(--muted);font-size:0.85rem;"></span>
+    <a href="#" id="nav-logout" class="btn btn-ghost btn-sm hidden">Logout</a>
+  </div>
+</nav>
+
+<div id="detail-root" style="max-width:1180px;margin:0 auto;padding:2rem 1.5rem;">
+  <!-- Skeleton -->
+  <div class="skeleton" style="height:360px;border-radius:14px;margin-bottom:1.5rem;"></div>
+  <div class="skeleton" style="height:28px;width:40%;margin-bottom:0.8rem;"></div>
+  <div class="skeleton" style="height:16px;width:60%;"></div>
+</div>
+
+<!-- Auth Modals -->
+<div id="login-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-title">Login to Book</div>
+    <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="you@example.com" /></div>
+    <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" /></div>
+    <button class="btn btn-primary btn-full mt-2" onclick="doLogin()">Login</button>
+    <button class="btn btn-ghost btn-sm mt-2" onclick="closeModals()" style="width:100%;">✕ Close</button>
+  </div>
+</div>
+<div id="register-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-title">Create account</div>
+    <div class="form-group"><label>Name</label><input type="text" id="reg-name" /></div>
+    <div class="form-group"><label>Email</label><input type="email" id="reg-email" /></div>
+    <div class="form-group"><label>Password</label><input type="password" id="reg-password" /></div>
+    <div class="form-group"><label>City</label><select id="reg-city"><option>Hyderabad</option><option>Bangalore</option><option>Mumbai</option></select></div>
+    <div class="form-group"><label>Role</label><select id="reg-role"><option value="user">User</option><option value="owner">Owner</option></select></div>
+    <button class="btn btn-primary btn-full mt-2" onclick="doRegister()">Create Account</button>
+    <button class="btn btn-ghost btn-sm mt-2" onclick="closeModals()" style="width:100%;">✕ Close</button>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/runtime-config.js"></script>
+<script src="js/main.js?v=20260403g"></script>
+<script src="js/detail.js?v=20260403g"></script>
+</body>
+</html>

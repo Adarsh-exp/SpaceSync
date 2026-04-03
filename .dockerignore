@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git/
+.gitignore
+.env
+.venv/
+venv/
+frontend/uploads/
+spacesync.db
+spacesync-local.db
+manual-test.db
+manual-test-escalated.db
+backend-8001.out.log
+backend-8001.err.log

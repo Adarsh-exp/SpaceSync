@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse Spaces - SpaceSync</title>
+  <link rel="stylesheet" href="css/style.css?v=20260403k" />
+  <style>
+    .browse-shell { max-width: 1240px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+    .browse-layout { display: grid; grid-template-columns: 280px 1fr; gap: 1.25rem; }
+    .browse-sidebar { position: sticky; top: 78px; align-self: start; display: grid; gap: 1rem; }
+    .browse-panel { background: linear-gradient(180deg, rgba(18,18,26,0.98), rgba(13,14,20,0.98)); border: 1px solid var(--border); border-radius: 20px; padding: 1.2rem; }
+    .browse-panel-title { font-family: var(--font-head); font-size: 0.88rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.95rem; }
+    .browse-type-list { display: grid; gap: 0.45rem; }
+    .browse-type-btn { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.72rem 0.85rem; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--text); font-family: var(--font-body); font-size: 0.9rem; cursor: pointer; transition: 0.18s ease; text-align: left; }
+    .browse-type-btn:hover, .browse-type-btn.active { border-color: var(--accent); background: rgba(249,115,22,0.08); color: var(--accent); }
+    .browse-price-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+    .browse-main { display: grid; gap: 1rem; }
+    .browse-toolbar { display: grid; gap: 1rem; padding: 1.15rem; border: 1px solid var(--border); border-radius: 20px; background: linear-gradient(180deg, rgba(18,18,26,0.98), rgba(13,14,20,0.98)); }
+    .browse-toolbar-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .browse-results-count { font-family: var(--font-head); font-size: 1.15rem; font-weight: 700; }
+    .browse-toolbar-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.9rem; align-items: center; }
+    .browse-search-input { min-height: 48px; border-radius: 14px; }
+    .browse-sort-select { min-width: 190px; min-height: 48px; border-radius: 14px; }
+    .browse-results { display: grid; gap: 1rem; }
+    .space-card { display: grid; grid-template-columns: 240px 1fr; background: linear-gradient(180deg, rgba(18,18,26,1), rgba(13,14,21,0.98)); border: 1px solid var(--border); border-radius: 22px; overflow: hidden; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; box-shadow: 0 18px 36px rgba(0,0,0,0.18); }
+    .space-card:hover { border-color: #3a3a55; transform: translateY(-2px); box-shadow: 0 24px 42px rgba(0,0,0,0.22); }
+    .space-card-img { width: 240px; min-height: 200px; background: linear-gradient(135deg, var(--bg-raised), #1e1e2f); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 3rem; color: rgba(255,255,255,0.9); }
+    .space-card-img img { width: 100%; height: 100%; object-fit: cover; }
+    .space-card-body { padding: 1.2rem 1.25rem; display: grid; gap: 1rem; }
+    .space-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .space-card-sub { color: #a6a8c0; font-size: 0.9rem; }
+    .space-card-meta { display: flex; flex-wrap: wrap; gap: 0.75rem; color: #a1a4bc; font-size: 0.84rem; }
+    .space-meta-pill { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.28rem 0.65rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); }
+    .surge-pill { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; font-weight: 600; color: var(--accent); background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.3); padding: 0.15rem 0.55rem; border-radius: 999px; }
+    .avail-wrap { margin-top: 0.45rem; }
+    .avail-label { font-size: 0.75rem; color: var(--muted); display: flex; justify-content: space-between; }
+    .browse-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); border: 1px dashed var(--border); border-radius: 20px; background: rgba(255,255,255,0.02); }
+    .browse-empty-icon { font-family: var(--font-head); font-size: 2.4rem; color: var(--accent); margin-bottom: 0.75rem; }
+    .browse-skeleton { display: grid; grid-template-columns: 240px 1fr; border: 1px solid var(--border); border-radius: 22px; overflow: hidden; background: rgba(255,255,255,0.02); }
+    @media (max-width: 900px) { .browse-layout { grid-template-columns: 1fr; } .browse-sidebar { position: static; } }
+    @media (max-width: 700px) { .browse-toolbar-row { grid-template-columns: 1fr; } .space-card, .browse-skeleton { grid-template-columns: 1fr; } .space-card-img, .browse-skeleton .skeleton:first-child { width: 100%; min-height: 180px; } .browse-shell { padding: 1.2rem 1rem 2.5rem; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">Space<span>Sync</span></a>
+  <div class="nav-links">
+    <a href="index.html" id="nav-home">Home</a>
+    <a href="listing.html">Browse</a>
+    <a href="#" id="nav-dashboard" class="hidden">Dashboard</a>
+    <a href="user-profile.html" id="nav-profile" class="hidden">Profile</a>
+    <a href="#" id="nav-login-btn">Login</a>
+    <a href="#" id="nav-register-btn" class="btn btn-primary btn-sm">Sign Up</a>
+    <span id="nav-user" class="hidden" style="color:var(--muted);font-size:0.85rem;"></span>
+    <a href="#" id="nav-logout" class="btn btn-ghost btn-sm hidden">Logout</a>
+  </div>
+</nav>
+
+<div class="browse-shell">
+  <div class="browse-layout">
+    <aside class="browse-sidebar">
+      <div class="browse-panel">
+        <div class="browse-panel-title">Space Type</div>
+        <div class="browse-type-list">
+          <button class="browse-type-btn type-btn active" data-type="" onclick="setType(this,'')"><span>All Types</span><span>All</span></button>
+          <button class="browse-type-btn type-btn" data-type="cricket" onclick="setType(this,'cricket')"><span>Cricket Ground</span><span>C</span></button>
+          <button class="browse-type-btn type-btn" data-type="party_hall" onclick="setType(this,'party_hall')"><span>Party Hall</span><span>H</span></button>
+          <button class="browse-type-btn type-btn" data-type="parking" onclick="setType(this,'parking')"><span>Parking</span><span>P</span></button>
+        </div>
+      </div>
+
+      <div class="browse-panel">
+        <div class="browse-panel-title">City</div>
+        <select id="filter-city" onchange="applyFilters()">
+          <option value="">All Cities</option>
+          <option>Hyderabad</option>
+          <option>Bangalore</option>
+          <option>Mumbai</option>
+          <option>Delhi</option>
+          <option>Chennai</option>
+          <option>Pune</option>
+        </select>
+      </div>
+
+      <div class="browse-panel">
+        <div class="browse-panel-title">Budget (Rs/hr)</div>
+        <div class="browse-price-row">
+          <div><label>Min</label><input type="number" id="filter-min" placeholder="0" onchange="applyFilters()" /></div>
+          <div><label>Max</label><input type="number" id="filter-max" placeholder="5000" onchange="applyFilters()" /></div>
+        </div>
+      </div>
+
+      <div class="browse-panel">
+        <div class="browse-panel-title">Min Rating</div>
+        <select id="filter-rating" onchange="applyFilters()">
+          <option value="0">Any</option>
+          <option value="3">3 stars & above</option>
+          <option value="4">4 stars & above</option>
+          <option value="4.5">4.5 stars & above</option>
+        </select>
+      </div>
+
+      <button class="btn btn-ghost btn-full" onclick="clearFilters()">Clear Filters</button>
+    </aside>
+
+    <main class="browse-main">
+      <div class="browse-toolbar">
+        <div class="browse-toolbar-top">
+          <div class="browse-results-count" id="results-count">Loading...</div>
+        </div>
+        <div class="browse-toolbar-row">
+          <input class="browse-search-input" type="text" id="filter-name-inline" placeholder="Search by space name..." oninput="syncNameSearch(this.value)" />
+          <select class="browse-sort-select" id="sort-select" onchange="sortSpaces()">
+            <option value="default">Sort: Default</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="rating">Top Rated</option>
+            <option value="popular">Most Popular</option>
+          </select>
+        </div>
+      </div>
+      <div id="results-list" class="browse-results"></div>
+    </main>
+  </div>
+</div>
+
+<div id="login-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-title">Welcome back</div>
+    <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="you@example.com" /></div>
+    <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="********" /></div>
+    <button class="btn btn-primary btn-full mt-2" onclick="doLogin()">Login</button>
+    <button class="btn btn-ghost btn-sm mt-2" onclick="closeModals()" style="width:100%;">Close</button>
+  </div>
+</div>
+<div id="register-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-title">Create account</div>
+    <div class="form-group"><label>Name</label><input type="text" id="reg-name" /></div>
+    <div class="form-group"><label>Email</label><input type="email" id="reg-email" /></div>
+    <div class="form-group"><label>Password</label><input type="password" id="reg-password" /></div>
+    <div class="form-group"><label>City</label><select id="reg-city"><option value="">Select</option><option>Hyderabad</option><option>Bangalore</option><option>Mumbai</option><option>Delhi</option><option>Chennai</option><option>Pune</option></select></div>
+    <div class="form-group"><label>Role</label><select id="reg-role"><option value="user">User</option><option value="owner">Space Owner</option></select></div>
+    <button class="btn btn-primary btn-full mt-2" onclick="doRegister()">Create Account</button>
+    <button class="btn btn-ghost btn-sm mt-2" onclick="closeModals()" style="width:100%;">Close</button>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/runtime-config.js"></script>
+<script src="js/main.js?v=20260403k"></script>
+<script src="js/listing.js?v=20260403j"></script>
+</body>
+</html>

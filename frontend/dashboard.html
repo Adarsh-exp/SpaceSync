@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — SpaceSync</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .dash-layout { max-width: 1180px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.5rem; }
+    .charts-row-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 1.2rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.4rem; position: relative; overflow: hidden; }
+    .stat-card::after { content: ""; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px; border-radius: 50%; opacity: 0.08; }
+    .stat-card.orange::after { background: var(--accent); }
+    .stat-card.indigo::after { background: var(--accent2); }
+    .stat-card.green::after  { background: var(--accent3); }
+    .stat-card.yellow::after { background: #fbbf24; }
+    .stat-icon { font-size: 1.6rem; margin-bottom: 0.6rem; }
+    .stat-value { font-family: var(--font-head); font-size: 2rem; font-weight: 800; letter-spacing: -1px; }
+    .stat-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.2rem; }
+    .stat-delta { font-size: 0.78rem; color: var(--accent3); margin-top: 0.3rem; }
+    .chart-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.3rem; }
+    .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .chart-title { font-family: var(--font-head); font-weight: 700; font-size: 0.95rem; }
+    .table-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .status-pill { display: inline-flex; padding: 0.18rem 0.55rem; border-radius: 999px; font-size: 0.72rem; font-weight: 600; }
+    .status-confirmed { background: rgba(16,185,129,0.15); color: var(--accent3); }
+    .status-cancelled { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.8rem; }
+    .heatmap-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+    .heatmap-cell { border-radius: 8px; padding: 0.8rem 0.5rem; text-align: center; background: var(--bg-raised); border: 1px solid var(--border); }
+    .heatmap-cell .slot-name { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .heatmap-cell .slot-count { font-family: var(--font-head); font-weight: 700; font-size: 1.3rem; margin-top: 0.3rem; }
+    .access-denied { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; }
+    @media (max-width: 900px) { .stats-row { grid-template-columns: repeat(2, 1fr); } .charts-row, .charts-row-3 { grid-template-columns: 1fr; } }
+    @media (max-width: 500px) { .stats-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">Space<span>Sync</span></a>
+  <div class="nav-links">
+    <a href="listing.html">Browse</a>
+    <a href="dashboard.html" style="color:var(--accent);">Dashboard</a>
+    <span id="nav-user" style="color:var(--muted);font-size:0.85rem;"></span>
+    <a href="#" id="nav-logout" class="btn btn-ghost btn-sm">Logout</a>
+  </div>
+</nav>
+
+<div id="dash-root" class="dash-layout">
+  <!-- Loading -->
+  <div style="display:flex;align-items:center;justify-content:center;height:60vh;">
+    <div style="text-align:center;color:var(--muted);">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">⏳</div>
+      <p>Loading dashboard…</p>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/runtime-config.js"></script>
+<script src="js/main.js?v=20260403f"></script>
+<script src="js/dashboard.js?v=20260402b"></script>
+</body>
+</html>

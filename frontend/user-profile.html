@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Profile - SpaceSync</title>
+  <link rel="stylesheet" href="css/style.css?v=20260403h" />
+</head>
+<body>
+  <nav>
+    <a class="nav-logo" href="index.html">Space<span>Sync</span></a>
+    <div class="nav-links">
+      <a href="index.html" id="nav-home">Home</a>
+      <a href="listing.html">Browse</a>
+      <a href="#" id="nav-dashboard" class="hidden">Dashboard</a>
+      <a href="user-profile.html" id="nav-profile" class="hidden">Profile</a>
+      <a href="#" id="nav-login-btn">Login</a>
+      <a href="#" id="nav-register-btn" class="btn btn-primary btn-sm">Sign Up</a>
+      <span id="nav-user" class="hidden" style="color:var(--muted);font-size:0.85rem;"></span>
+      <a href="#" id="nav-logout" class="btn btn-ghost btn-sm hidden">Logout</a>
+    </div>
+  </nav>
+
+  <main id="user-profile-root" class="owner-shell"></main>
+  <div id="toast-container"></div>
+
+  <script src="js/runtime-config.js"></script>
+  <script src="js/main.js?v=20260403g"></script>
+  <script src="js/user-profile.js?v=20260403e"></script>
+</body>
+</html>

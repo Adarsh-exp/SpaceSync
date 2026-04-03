@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpaceSync - Book Cricket Grounds, Party Halls and Parking</title>
+  <link rel="stylesheet" href="css/style.css?v=20260403i" />
+</head>
+<body class="home-page">
+
+<nav>
+  <a class="nav-logo" href="index.html">Space<span>Sync</span></a>
+  <div class="nav-links">
+    <a href="index.html" id="nav-home">Home</a>
+    <a href="listing.html">Browse</a>
+    <a href="#" id="nav-dashboard" class="hidden">Dashboard</a>
+    <a href="user-profile.html" id="nav-profile" class="hidden">Profile</a>
+    <a href="#" id="nav-login-btn">Login</a>
+    <a href="#" id="nav-register-btn" class="btn btn-primary btn-sm">Sign Up</a>
+    <span id="nav-user" class="hidden" style="color:var(--muted);font-size:0.85rem;"></span>
+    <a href="#" id="nav-logout" class="btn btn-ghost btn-sm hidden">Logout</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-lines"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">India's space booking platform</div>
+    <h1 class="hero-title">
+      Book Any Space,<br><em>Any Time.</em>
+    </h1>
+    <p class="hero-sub">Cricket grounds, party halls, and parking spots - all in one place. AI-powered pricing. Instant confirmation.</p>
+
+    <div class="search-bar">
+      <select id="search-city">
+        <option value="">City</option>
+        <option>Hyderabad</option>
+        <option>Bangalore</option>
+        <option>Mumbai</option>
+        <option>Delhi</option>
+        <option>Chennai</option>
+        <option>Pune</option>
+      </select>
+      <select id="search-type">
+        <option value="">Space Type</option>
+        <option value="cricket">Cricket Ground</option>
+        <option value="party_hall">Party Hall</option>
+        <option value="parking">Parking</option>
+      </select>
+      <input type="date" id="search-date" />
+      <button class="btn btn-primary" onclick="doSearch()">Search -></button>
+    </div>
+
+    <div class="stats-strip">
+      <div class="item"><span class="num" id="stat-spaces">--</span><span class="lbl">Spaces Listed</span></div>
+      <div class="item"><span class="num" id="stat-cities">6+</span><span class="lbl">Cities</span></div>
+      <div class="item"><span class="num" id="stat-bookings">--</span><span class="lbl">Bookings Made</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="home-categories">
+  <div class="container">
+    <div class="home-category-grid">
+      <a class="home-category-card" href="listing.html?type=cricket">
+        <div class="home-category-icon">C</div>
+        <div class="home-category-title">Cricket Grounds</div>
+        <div class="home-category-copy">Practice sessions, turf matches and weekend groups with flexible time selection.</div>
+        <div class="home-category-meta">Browse grounds</div>
+      </a>
+      <a class="home-category-card" href="listing.html?type=party_hall">
+        <div class="home-category-icon">H</div>
+        <div class="home-category-title">Party Halls</div>
+        <div class="home-category-copy">Shortlist event spaces quickly with location, timing and contact visibility.</div>
+        <div class="home-category-meta">Browse halls</div>
+      </a>
+      <a class="home-category-card" href="listing.html?type=parking">
+        <div class="home-category-icon">P</div>
+        <div class="home-category-title">Parking Spots</div>
+        <div class="home-category-copy">Find quick hourly parking or recurring daily options in busy localities.</div>
+        <div class="home-category-meta">Browse parking</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="home-featured">
+  <div class="container">
+    <div class="home-feature-banner">
+      <div>
+        <h2 class="section-title">Featured spaces</h2>
+        <p>Fresh listings with better detail pages, clearer timings and direct owner contact.</p>
+      </div>
+      <a class="btn btn-secondary" href="listing.html">View all spaces</a>
+    </div>
+    <div class="grid-3" id="featured-grid">
+      <div class="home-space-card">
+        <div class="skeleton" style="height:210px;"></div>
+        <div class="card-body">
+          <div class="skeleton" style="height:14px;width:55%;margin-bottom:10px;"></div>
+          <div class="skeleton" style="height:12px;width:40%;margin-bottom:10px;"></div>
+          <div class="skeleton" style="height:12px;width:70%;"></div>
+        </div>
+      </div>
+      <div class="home-space-card">
+        <div class="skeleton" style="height:210px;"></div>
+        <div class="card-body">
+          <div class="skeleton" style="height:14px;width:55%;margin-bottom:10px;"></div>
+          <div class="skeleton" style="height:12px;width:40%;margin-bottom:10px;"></div>
+          <div class="skeleton" style="height:12px;width:70%;"></div>
+        </div>
+      </div>
+      <div class="home-space-card">
+        <div class="skeleton" style="height:210px;"></div>
+        <div class="card-body">
+          <div class="skeleton" style="height:14px;width:55%;margin-bottom:10px;"></div>
+          <div class="skeleton" style="height:12px;width:40%;margin-bottom:10px;"></div>
+          <div class="skeleton" style="height:12px;width:70%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="home-why">
+  <div class="container">
+    <div class="home-section-panel">
+      <div class="home-section-head">
+        <div>
+          <h2 class="section-title">How SpaceSync works</h2>
+          <p class="home-section-copy">Built for quicker discovery, fewer back-and-forth calls and better booking clarity on both sides.</p>
+        </div>
+      </div>
+
+      <div class="home-steps-grid">
+        <div class="home-step-card">
+          <div class="home-step-index">01</div>
+          <div class="home-step-title">Search with intent</div>
+          <div class="home-step-desc">Start with city and type, then narrow down by budget, rating and timing without friction.</div>
+        </div>
+        <div class="home-step-card">
+          <div class="home-step-index">02</div>
+          <div class="home-step-title">Check the real details</div>
+          <div class="home-step-desc">Open the detail page to see photos, service hours, reviews, location map and contact actions.</div>
+        </div>
+        <div class="home-step-card">
+          <div class="home-step-index">03</div>
+          <div class="home-step-title">Book or enquire</div>
+          <div class="home-step-desc">Choose your own time range, call the owner, message them or complete the booking flow directly.</div>
+        </div>
+      </div>
+
+      <div class="home-owner-cta">
+        <div class="home-owner-copy">
+          <h3 class="section-title" style="font-size:1.5rem;">Own a space?</h3>
+          <p class="mt-1">Create listings, upload photos, manage timings, update your contact details and keep your business information current from the owner area.</p>
+          <div class="home-hero-actions">
+            <a class="btn btn-primary" href="owner/update-listing.html">Go to owner tools</a>
+            <a class="btn btn-ghost" href="#" id="home-owner-register">Create owner account</a>
+          </div>
+        </div>
+        <div class="home-owner-points">
+          <div class="home-owner-point">
+            <strong>Flexible listing control</strong>
+            <span>Edit pricing, timings, amenities, contact details and photos whenever needed.</span>
+          </div>
+          <div class="home-owner-point">
+            <strong>Clear customer contact</strong>
+            <span>Let users call, send enquiries or reach you on WhatsApp from the space detail page.</span>
+          </div>
+          <div class="home-owner-point">
+            <strong>Better trust on detail pages</strong>
+            <span>Your spaces can now show maps, owner replies, photos and structured business information.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="login-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-title">Welcome back</div>
+    <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="you@example.com" /></div>
+    <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="********" /></div>
+    <button class="btn btn-primary btn-full mt-2" onclick="doLogin()">Login</button>
+    <p class="text-muted text-sm mt-2" style="text-align:center;">No account? <a href="#" onclick="showRegister()" style="color:var(--accent2);">Sign up</a></p>
+    <button class="btn btn-ghost btn-sm mt-2" onclick="closeModals()" style="width:100%;">Close</button>
+  </div>
+</div>
+
+<div id="register-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-title">Create account</div>
+    <div class="form-group"><label>Name</label><input type="text" id="reg-name" placeholder="Your name" /></div>
+    <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com" /></div>
+    <div class="form-group"><label>Password</label><input type="password" id="reg-password" placeholder="********" /></div>
+    <div class="form-group"><label>City</label>
+      <select id="reg-city">
+        <option value="">Select city</option>
+        <option>Hyderabad</option>
+        <option>Bangalore</option>
+        <option>Mumbai</option>
+        <option>Delhi</option>
+        <option>Chennai</option>
+        <option>Pune</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Role</label>
+      <select id="reg-role">
+        <option value="user">User (book spaces)</option>
+        <option value="owner">Space Owner (list spaces)</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-full mt-2" onclick="doRegister()">Create Account</button>
+    <p class="text-muted text-sm mt-2" style="text-align:center;">Already have account? <a href="#" onclick="showLogin()" style="color:var(--accent2);">Login</a></p>
+    <button class="btn btn-ghost btn-sm mt-2" onclick="closeModals()" style="width:100%;">Close</button>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/runtime-config.js"></script>
+<script src="js/main.js?v=20260403i"></script>
+<script>
+  const API = window.API_BASE;
+
+  document.getElementById('search-date').valueAsDate = new Date();
+  document.getElementById('home-owner-register')?.addEventListener('click', (event) => {
+    event.preventDefault();
+    showRegister();
+    const role = document.getElementById('reg-role');
+    if (role) role.value = 'owner';
+  });
+
+  function doSearch() {
+    const city = document.getElementById('search-city').value;
+    const type = document.getElementById('search-type').value;
+    const date = document.getElementById('search-date').value;
+    const params = new URLSearchParams();
+    if (city) params.set('city', city);
+    if (type) params.set('type', type);
+    if (date) params.set('date', date);
+    window.location.href = 'listing.html?' + params.toString();
+  }
+
+  async function loadFeatured() {
+    try {
+      const res = await fetch(`${API}/spaces?`);
+      const spaces = await res.json();
+      const grid = document.getElementById('featured-grid');
+      const featured = spaces.slice(0, 3);
+
+      document.getElementById('stat-spaces').textContent = `${spaces.length}+`;
+      document.getElementById('stat-bookings').textContent = `${spaces.reduce((total, space) => total + (space.total_bookings || 0), 0)}+`;
+
+      if (featured.length === 0) {
+        grid.innerHTML = '<p class="text-muted" style="grid-column:1/-1">No spaces listed yet. <a href="#" onclick="showRegister(); return false;" style="color:var(--accent2)">Be the first to list one.</a></p>';
+        return;
+      }
+
+      grid.innerHTML = featured.map(space => spaceCard(space)).join('');
+    } catch (error) {
+      document.getElementById('featured-grid').innerHTML = '<p class="text-muted" style="grid-column:1/-1;">Could not load spaces right now. Please make sure the API is running.</p>';
+    }
+  }
+
+  function spaceCard(space) {
+    const icons = { cricket: 'C', party_hall: 'H', parking: 'P' };
+    const badge = `badge-${space.type.replace('_', '')}`;
+    const img = space.image_url
+      ? `<img class="card-img" src="${space.image_url}" alt="${space.name}" />`
+      : `<div class="card-img-placeholder">${icons[space.type] || 'S'}</div>`;
+
+    return `
+      <a href="detail.html?id=${space.id}" style="text-decoration:none;color:inherit;">
+        <div class="home-space-card">
+          ${img}
+          <div class="card-body">
+            <div class="home-space-topline">
+              <span class="badge ${badge}">${(space.type || '').replace('_', ' ')}</span>
+              <span class="text-sm">${starsHTML(space.rating || 0)}</span>
+            </div>
+            <div class="card-title">${space.name}</div>
+            <div class="home-space-location">${space.city}${space.area ? `, ${space.area}` : ''}</div>
+            <div class="home-space-meta">
+              <span>${space.total_bookings || 0}+ bookings</span>
+              <span>${space.opening_time || '09:00'} - ${space.closing_time || '22:00'}</span>
+            </div>
+            <div class="flex items-center justify-between mt-2">
+              <div><span class="price price-normal">Rs ${space.base_price}</span><span class="price-sub">/hr</span></div>
+              <button class="btn btn-primary btn-sm">Book Now</button>
+            </div>
+          </div>
+        </div>
+      </a>`;
+  }
+
+  loadFeatured();
+</script>
+</body>
+</html>

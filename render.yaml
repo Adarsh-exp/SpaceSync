@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: spacesync-api
+    runtime: python
+    buildCommand: |
+      pip install -r backend/requirements.txt
+      python -m backend.ml.train_surge_pricing
+      python -m backend.ml.train_recommendations
+      python -m backend.ml.train_availability
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DB_SSLMODE
+        value: require
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+    healthCheckPath: /
