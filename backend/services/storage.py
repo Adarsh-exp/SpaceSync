@@ -33,6 +33,12 @@ def _configure_cloudinary() -> bool:
     cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
     api_key = os.getenv("CLOUDINARY_API_KEY")
     api_secret = os.getenv("CLOUDINARY_API_SECRET")
+    placeholder_markers = ("your_", "placeholder", "change_me")
+    if any(
+        value and any(marker in value.lower() for marker in placeholder_markers)
+        for value in (cloud_name, api_key, api_secret)
+    ):
+        return False
     if not cloud_name or not api_key or not api_secret or cloudinary is None:
         return False
     cloudinary.config(cloud_name=cloud_name, api_key=api_key, api_secret=api_secret, secure=True)
@@ -78,7 +84,10 @@ async def upload_space_image(space_id: int, file: UploadFile) -> str:
                 overwrite=True,
             )
         except Exception as exc:  # pragma: no cover - depends on external service
-            raise HTTPException(status_code=500, detail=f"Cloudinary upload failed: {exc}") from exc
+            message = str(exc)
+            if "Must supply api_key" in message or "Must supply cloud_name" in message:
+                raise HTTPException(status_code=500, detail="Cloudinary is not configured correctly on the server") from exc
+            raise HTTPException(status_code=500, detail=f"Cloudinary upload failed: {message}") from exc
         secure_url = result.get("secure_url")
         if not secure_url:
             raise HTTPException(status_code=500, detail="Cloudinary upload succeeded but no secure URL was returned")

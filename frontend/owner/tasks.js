@@ -1,5 +1,6 @@
 let ownerSpaces = [];
 let editingSpaceId = null;
+let ownerSelectedLocation = { lat: null, lng: null };
 
 function ownerSpaceModalMarkup() {
   return `
@@ -23,8 +24,16 @@ function ownerSpaceModalMarkup() {
         <div class="form-group"><label>Base Price (Rs/hr)</label><input type="number" id="owner-space-price" min="1" placeholder="e.g. 700" /></div>
         <div class="form-group"><label>Opening Time</label><input type="time" id="owner-space-opening-time" value="09:00" /></div>
         <div class="form-group"><label>Closing Time</label><input type="time" id="owner-space-closing-time" value="22:00" /></div>
-        <div class="form-group"><label>Latitude (optional)</label><input type="number" id="owner-space-lat" step="any" placeholder="e.g. 18.5590" /></div>
-        <div class="form-group"><label>Longitude (optional)</label><input type="number" id="owner-space-lng" step="any" placeholder="e.g. 73.7868" /></div>
+        <div class="form-group">
+          <label>Location (optional)</label>
+          <div class="owner-location-picker">
+            <div class="owner-location-status" id="owner-space-location-status">No location selected yet.</div>
+            <div class="owner-location-actions">
+              <button type="button" class="btn btn-secondary btn-sm" id="owner-space-location-pick-btn">Use Current Location</button>
+              <button type="button" class="btn btn-ghost btn-sm hidden" id="owner-space-location-clear-btn">Clear Location</button>
+            </div>
+          </div>
+        </div>
         <div class="form-group"><label>Amenities (comma separated)</label><input type="text" id="owner-space-amenities" placeholder="Lights, Parking, Washroom" /></div>
         <div class="form-group">
           <label>Listing Photo</label>
@@ -47,9 +56,12 @@ function ensureOwnerSpaceModal() {
   modal?.addEventListener("click", event => { if (event.target === modal) closeOwnerSpaceModal(); });
   document.getElementById("owner-space-close-btn")?.addEventListener("click", closeOwnerSpaceModal);
   document.getElementById("owner-space-save-btn")?.addEventListener("click", saveOwnerSpace);
+  document.getElementById("owner-space-location-pick-btn")?.addEventListener("click", pickOwnerLocation);
+  document.getElementById("owner-space-location-clear-btn")?.addEventListener("click", clearOwnerLocation);
 }
 
 function populateOwnerSpaceForm(space = null) {
+  ownerSelectedLocation = { lat: space?.lat ?? null, lng: space?.lng ?? null };
   document.getElementById("owner-space-name").value = space?.name || "";
   document.getElementById("owner-space-type").value = space?.type || "cricket";
   document.getElementById("owner-space-city").value = space?.city || "";
@@ -57,8 +69,6 @@ function populateOwnerSpaceForm(space = null) {
   document.getElementById("owner-space-price").value = space?.base_price || "";
   document.getElementById("owner-space-opening-time").value = space?.opening_time || "09:00";
   document.getElementById("owner-space-closing-time").value = space?.closing_time || "22:00";
-  document.getElementById("owner-space-lat").value = space?.lat ?? "";
-  document.getElementById("owner-space-lng").value = space?.lng ?? "";
   document.getElementById("owner-space-amenities").value = space?.amenities || "";
   document.getElementById("owner-space-image").value = "";
   const previewWrap = document.getElementById("owner-space-image-preview-wrap");
@@ -72,6 +82,7 @@ function populateOwnerSpaceForm(space = null) {
   }
   document.getElementById("owner-space-modal-title").textContent = editingSpaceId ? "Update Space" : "Add Space";
   document.getElementById("owner-space-save-btn").textContent = editingSpaceId ? "Save Changes" : "Create Listing";
+  renderOwnerLocationStatus();
 }
 
 function openOwnerSpaceModal(spaceId = null) {
@@ -84,6 +95,64 @@ function openOwnerSpaceModal(spaceId = null) {
 function closeOwnerSpaceModal() {
   document.getElementById("owner-space-modal")?.classList.add("hidden");
   editingSpaceId = null;
+}
+
+function renderOwnerLocationStatus() {
+  const status = document.getElementById("owner-space-location-status");
+  const clearBtn = document.getElementById("owner-space-location-clear-btn");
+  if (!status || !clearBtn) return;
+  if (Number.isFinite(ownerSelectedLocation.lat) && Number.isFinite(ownerSelectedLocation.lng)) {
+    status.textContent = `Selected location: ${ownerSelectedLocation.lat.toFixed(5)}, ${ownerSelectedLocation.lng.toFixed(5)}`;
+    clearBtn.classList.remove("hidden");
+  } else {
+    status.textContent = "No location selected yet.";
+    clearBtn.classList.add("hidden");
+  }
+}
+
+function clearOwnerLocation() {
+  ownerSelectedLocation = { lat: null, lng: null };
+  renderOwnerLocationStatus();
+}
+
+function pickOwnerLocation() {
+  if (!navigator.geolocation) {
+    toast("Geolocation is not supported on this device", "error");
+    return;
+  }
+
+  const pickBtn = document.getElementById("owner-space-location-pick-btn");
+  const previousLabel = pickBtn?.textContent;
+  if (pickBtn) {
+    pickBtn.disabled = true;
+    pickBtn.textContent = "Fetching...";
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      ownerSelectedLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      renderOwnerLocationStatus();
+      toast("Location selected");
+      if (pickBtn) {
+        pickBtn.disabled = false;
+        pickBtn.textContent = previousLabel;
+      }
+    },
+    error => {
+      const message = error.code === error.PERMISSION_DENIED
+        ? "Location permission was denied"
+        : "Could not fetch your current location";
+      toast(message, "error");
+      if (pickBtn) {
+        pickBtn.disabled = false;
+        pickBtn.textContent = previousLabel;
+      }
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+  );
 }
 
 function renderOwnerSpaceCard(space) {
@@ -132,8 +201,8 @@ async function saveOwnerSpace() {
     opening_time: document.getElementById("owner-space-opening-time").value,
     closing_time: document.getElementById("owner-space-closing-time").value,
     amenities: document.getElementById("owner-space-amenities").value.trim(),
-    lat: document.getElementById("owner-space-lat").value ? parseFloat(document.getElementById("owner-space-lat").value) : null,
-    lng: document.getElementById("owner-space-lng").value ? parseFloat(document.getElementById("owner-space-lng").value) : null,
+    lat: Number.isFinite(ownerSelectedLocation.lat) ? ownerSelectedLocation.lat : null,
+    lng: Number.isFinite(ownerSelectedLocation.lng) ? ownerSelectedLocation.lng : null,
   };
 
   if (!payload.name || !payload.city || !payload.type || !Number.isFinite(payload.base_price) || payload.base_price <= 0) {
@@ -144,11 +213,6 @@ async function saveOwnerSpace() {
     toast("Closing time must be later than opening time", "error");
     return;
   }
-  if ((document.getElementById("owner-space-lat").value && !Number.isFinite(payload.lat)) || (document.getElementById("owner-space-lng").value && !Number.isFinite(payload.lng))) {
-    toast("Latitude and longitude must be valid numbers", "error");
-    return;
-  }
-
   try {
     const savedSpace = await ownerFetch(`/spaces${editingSpaceId ? `/${editingSpaceId}` : ""}`, {
       method: editingSpaceId ? "PUT" : "POST",
@@ -177,7 +241,7 @@ async function uploadOwnerSpaceImage(spaceId, file) {
   });
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.detail || "Failed to upload image");
+    throw new Error(data.detail || "Photo upload failed. Please check the server storage configuration.");
   }
   return data;
 }

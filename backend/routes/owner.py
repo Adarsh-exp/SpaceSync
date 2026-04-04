@@ -293,6 +293,16 @@ def unblock_slot(
     return {"message": "Slot unblocked"}
 
 
+@router.post("/slots/{space_id}/unblock")
+def unblock_slot_post(
+    space_id: int,
+    payload: SlotBlockDelete,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_owner_user),
+):
+    return unblock_slot(space_id, payload, db, current_user)
+
+
 @router.get("/bookings/pending", response_model=List[OwnerBookingSummary])
 def get_pending_booking_requests(
     db: Session = Depends(get_db),

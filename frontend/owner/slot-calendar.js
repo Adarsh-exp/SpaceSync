@@ -78,28 +78,38 @@ async function loadBreakdown(dateValue) {
             <div class="owner-card-meta">${slot.booked_by_name || slot.reason || "Open for booking"}</div>
             <div class="owner-card-meta">${slot.price ? formatMoney(slot.price) : ""}</div>
           </div>
-          <div class="flex items-center gap-1">
+          <div class="slot-actions">
             ${statusBadge(slot.booking_status || slot.status)}
-            ${slot.status === "blocked"
-              ? `<button class="btn btn-secondary btn-sm" onclick="toggleBlock('${dateValue}','${slot.slot_time}', false)">Unblock</button>`
-              : `<button class="btn btn-secondary btn-sm" onclick="toggleBlock('${dateValue}','${slot.slot_time}', true)">Block</button>`}
+            ${renderSlotActionButton(slot, dateValue)}
           </div>
         </div>`).join("")}
     </div>`;
+}
+
+function renderSlotActionButton(slot, dateValue) {
+  if (slot.status === "blocked") {
+    return `<button class="btn btn-ghost btn-sm owner-slot-btn owner-slot-btn-unblock" onclick="toggleBlock('${dateValue}','${slot.slot_time}', false)">Unblock Slot</button>`;
+  }
+  if (slot.status === "available") {
+    return `<button class="btn btn-primary btn-sm owner-slot-btn" onclick="toggleBlock('${dateValue}','${slot.slot_time}', true)">Block Slot</button>`;
+  }
+  return `<button class="btn btn-secondary btn-sm owner-slot-btn" disabled>${slot.status === "pending" ? "Pending booking" : "Already booked"}</button>`;
 }
 
 async function toggleBlock(dateValue, slotTime, shouldBlock) {
   const spaceId = document.getElementById("slot-space-select").value;
   try {
     if (shouldBlock) {
+      const reason = window.prompt(`Reason for blocking ${slotTime}?`, "Owner blocked");
+      if (reason === null) return;
       await ownerFetch(`/owner/slots/${spaceId}/block`, {
         method: "POST",
-        body: JSON.stringify({ blocked_date: dateValue, slot_time: slotTime, reason: "Owner blocked" }),
+        body: JSON.stringify({ blocked_date: dateValue, slot_time: slotTime, reason: reason.trim() || "Owner blocked" }),
       });
       toast("Slot blocked");
     } else {
       await ownerFetch(`/owner/slots/${spaceId}/unblock`, {
-        method: "DELETE",
+        method: "POST",
         body: JSON.stringify({ blocked_date: dateValue, slot_time: slotTime }),
       });
       toast("Slot unblocked");
