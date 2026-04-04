@@ -76,6 +76,41 @@ function ensureHomeLink() {
   homeLink.href = getHomeHref();
 }
 
+function ensureMobileNavToggle() {
+  const nav = document.querySelector("nav");
+  const navLinks = document.querySelector(".nav-links");
+  if (!nav || !navLinks) return;
+
+  let toggle = document.getElementById("nav-toggle");
+  if (!toggle) {
+    toggle = document.createElement("button");
+    toggle.id = "nav-toggle";
+    toggle.className = "nav-toggle";
+    toggle.type = "button";
+    toggle.setAttribute("aria-label", "Toggle navigation");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.textContent = "Menu";
+    nav.insertBefore(toggle, navLinks);
+  }
+
+  if (!toggle.dataset.bound) {
+    toggle.addEventListener("click", () => {
+      const isOpen = nav.classList.toggle("nav-open");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+      toggle.textContent = isOpen ? "Close" : "Menu";
+    });
+
+    navLinks.addEventListener("click", (event) => {
+      if (!event.target.closest("a")) return;
+      nav.classList.remove("nav-open");
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.textContent = "Menu";
+    });
+
+    toggle.dataset.bound = "true";
+  }
+}
+
 function ensureProfileLink() {
   const navLinks = document.querySelector(".nav-links");
   if (!navLinks) return null;
@@ -127,6 +162,7 @@ function setActiveNavLink() {
 // ── Nav state ────────────────────────────────────────────────────────────────
 function updateNav() {
   ensureHomeLink();
+  ensureMobileNavToggle();
   const profileLink = ensureProfileLink();
   const user = getUser();
   const loginBtn    = document.getElementById("nav-login-btn");
