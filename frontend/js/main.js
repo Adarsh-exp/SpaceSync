@@ -81,6 +81,11 @@ function ensureMobileNavToggle() {
   const navLinks = document.querySelector(".nav-links");
   if (!nav || !navLinks) return;
 
+  const setToggleState = (isOpen) => {
+    toggle.setAttribute("aria-expanded", String(isOpen));
+    toggle.textContent = isOpen ? "×" : "☰";
+  };
+
   let toggle = document.getElementById("nav-toggle");
   if (!toggle) {
     toggle = document.createElement("button");
@@ -89,26 +94,26 @@ function ensureMobileNavToggle() {
     toggle.type = "button";
     toggle.setAttribute("aria-label", "Toggle navigation");
     toggle.setAttribute("aria-expanded", "false");
-    toggle.textContent = "Menu";
+    toggle.textContent = "☰";
     nav.insertBefore(toggle, navLinks);
   }
 
   if (!toggle.dataset.bound) {
     toggle.addEventListener("click", () => {
       const isOpen = nav.classList.toggle("nav-open");
-      toggle.setAttribute("aria-expanded", String(isOpen));
-      toggle.textContent = isOpen ? "Close" : "Menu";
+      setToggleState(isOpen);
     });
 
     navLinks.addEventListener("click", (event) => {
       if (!event.target.closest("a")) return;
       nav.classList.remove("nav-open");
-      toggle.setAttribute("aria-expanded", "false");
-      toggle.textContent = "Menu";
+      setToggleState(false);
     });
 
     toggle.dataset.bound = "true";
   }
+
+  setToggleState(nav.classList.contains("nav-open"));
 }
 
 function ensureProfileLink() {
