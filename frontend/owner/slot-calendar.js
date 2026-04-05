@@ -1,5 +1,42 @@
+function getOwnerUserOrRenderFallback(rootId) {
+  if (typeof ownerGuard === "function") {
+    return ownerGuard(rootId);
+  }
+  const user = getUser();
+  if (!user || user.role !== "owner") {
+    const root = document.getElementById(rootId);
+    if (root) {
+      root.innerHTML = `
+        <div class="empty-state">
+          <h2 class="section-title">Owner Access Only</h2>
+          <p class="mt-1">Log in with an owner account to use these tools.</p>
+          <a class="btn btn-primary mt-2" href="../index.html">Go Home</a>
+        </div>`;
+    }
+    return null;
+  }
+  return user;
+}
+
+function renderOwnerNavSafe(activePath) {
+  if (typeof renderOwnerNav === "function") {
+    return renderOwnerNav(activePath);
+  }
+  const navVersion = "20260405b";
+  return `
+    <div class="owner-subnav">
+      <a href="slot-calendar.html?v=${navVersion}" class="${activePath === "slot-calendar" ? "active" : ""}">Slot Calendar</a>
+      <a href="bookings.html?v=${navVersion}" class="${activePath === "bookings" ? "active" : ""}">Bookings</a>
+      <a href="earnings.html?v=${navVersion}" class="${activePath === "earnings" ? "active" : ""}">Earnings</a>
+      <a href="reviews.html?v=${navVersion}" class="${activePath === "reviews" ? "active" : ""}">Reviews</a>
+      <a href="notifications.html?v=${navVersion}" class="${activePath === "notifications" ? "active" : ""}">Notifications</a>
+      <a href="profile.html?v=${navVersion}" class="${activePath === "profile" ? "active" : ""}">Profile</a>
+      <a href="update-listing.html?v=${navVersion}" class="${activePath === "update-listing" ? "active" : ""}">Update Listing</a>
+    </div>`;
+}
+
 async function initOwnerSlotCalendar() {
-  const user = ownerGuard("owner-slot-root");
+  const user = getOwnerUserOrRenderFallback("owner-slot-root");
   if (!user) return;
   document.getElementById("nav-user").textContent = user.name;
   document.getElementById("nav-logout")?.addEventListener("click", e => { e.preventDefault(); doLogout(); });
@@ -13,7 +50,7 @@ async function initOwnerSlotCalendar() {
     <div class="owner-header">
       <div><h1 class="section-title">Slot Calendar</h1><p class="section-sub">See availability, bookings, and owner blocks by month.</p></div>
     </div>
-    ${renderOwnerNav("slot-calendar")}
+    ${renderOwnerNavSafe("slot-calendar")}
     <div class="owner-panel">
       <div class="owner-toolbar">
         <div class="owner-filters">

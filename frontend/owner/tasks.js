@@ -4,6 +4,43 @@ let ownerSelectedLocation = { lat: null, lng: null };
 let ownerLocationMap = null;
 let ownerLocationMarker = null;
 
+function getOwnerUserOrRenderFallback(rootId) {
+  if (typeof ownerGuard === "function") {
+    return ownerGuard(rootId);
+  }
+  const user = getUser();
+  if (!user || user.role !== "owner") {
+    const root = document.getElementById(rootId);
+    if (root) {
+      root.innerHTML = `
+        <div class="empty-state">
+          <h2 class="section-title">Owner Access Only</h2>
+          <p class="mt-1">Log in with an owner account to use these tools.</p>
+          <a class="btn btn-primary mt-2" href="../index.html">Go Home</a>
+        </div>`;
+    }
+    return null;
+  }
+  return user;
+}
+
+function renderOwnerNavSafe(activePath) {
+  if (typeof renderOwnerNav === "function") {
+    return renderOwnerNav(activePath);
+  }
+  const navVersion = "20260405b";
+  return `
+    <div class="owner-subnav">
+      <a href="slot-calendar.html?v=${navVersion}" class="${activePath === "slot-calendar" ? "active" : ""}">Slot Calendar</a>
+      <a href="bookings.html?v=${navVersion}" class="${activePath === "bookings" ? "active" : ""}">Bookings</a>
+      <a href="earnings.html?v=${navVersion}" class="${activePath === "earnings" ? "active" : ""}">Earnings</a>
+      <a href="reviews.html?v=${navVersion}" class="${activePath === "reviews" ? "active" : ""}">Reviews</a>
+      <a href="notifications.html?v=${navVersion}" class="${activePath === "notifications" ? "active" : ""}">Notifications</a>
+      <a href="profile.html?v=${navVersion}" class="${activePath === "profile" ? "active" : ""}">Profile</a>
+      <a href="update-listing.html?v=${navVersion}" class="${activePath === "update-listing" ? "active" : ""}">Update Listing</a>
+    </div>`;
+}
+
 function ownerSpaceModalMarkup() {
   return `
     <div class="modal-overlay add-space-modal-shell hidden" id="owner-space-modal">
@@ -307,7 +344,7 @@ async function uploadOwnerSpaceImageForCard(spaceId) {
 }
 
 async function initOwnerTasks() {
-  const user = ownerGuard("owner-tasks-root");
+  const user = getOwnerUserOrRenderFallback("owner-tasks-root");
   if (!user) return;
   document.getElementById("nav-user").textContent = user.name;
   document.getElementById("nav-logout")?.addEventListener("click", event => { event.preventDefault(); doLogout(); });
@@ -321,7 +358,7 @@ async function initOwnerTasks() {
         <a class="btn btn-secondary" href="profile.html">Update Business Contact</a>
       </div>
     </div>
-    ${renderOwnerNav("update-listing")}
+    ${renderOwnerNavSafe("update-listing")}
     <div class="owner-panel">
       <div class="chart-title">Your Spaces</div>
       <div class="owner-grid-3" id="owner-space-list"></div>
