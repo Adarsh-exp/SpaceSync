@@ -56,6 +56,9 @@ nav {
   color: var(--text);
   text-decoration: none;
   letter-spacing: -0.5px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
 }
 
 .nav-logo span { color: var(--accent); }
@@ -1250,8 +1253,9 @@ tr:hover td { background: var(--bg-raised); }
     gap: 0.75rem;
   }
   .nav-logo {
-    font-size: 1.35rem;
-    max-width: calc(100% - 58px);
+    font-size: clamp(1.45rem, 5.8vw, 1.9rem);
+    max-width: calc(100% - 64px);
+    overflow: hidden;
   }
   .nav-toggle { display: inline-flex; }
   .nav-links {
