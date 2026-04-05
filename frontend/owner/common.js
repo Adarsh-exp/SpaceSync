@@ -16,7 +16,7 @@ function ownerGuard(rootId) {
 }
 
 function renderOwnerNav(activePath) {
-  const navVersion = "20260403e";
+  const navVersion = "20260405b";
   return `
     <div class="owner-subnav">
       <a href="slot-calendar.html?v=${navVersion}" class="${activePath === "slot-calendar" ? "active" : ""}">Slot Calendar</a>
