@@ -26,7 +26,9 @@ async function initOwnerSlotCalendar() {
           <span class="status-badge status-blocked">Full</span>
         </div>
       </div>
-      <div id="slot-calendar-grid" class="owner-calendar"></div>
+      <div class="owner-calendar-shell">
+        <div id="slot-calendar-grid" class="owner-calendar"></div>
+      </div>
       <div id="slot-breakdown-panel" class="owner-panel mt-2 hidden"></div>
     </div>`;
 

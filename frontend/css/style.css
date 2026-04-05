@@ -482,6 +482,7 @@ tr:hover td { background: var(--bg-raised); }
 .owner-card-title { font-family: var(--font-head); font-size: 1rem; font-weight: 700; margin-bottom: 0.35rem; }
 .owner-card-meta { color: var(--muted); font-size: 0.84rem; }
 .owner-kpi { font-family: var(--font-head); font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; }
+.owner-calendar-shell { width: 100%; }
 .owner-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.6rem; }
 .calendar-head { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.2rem; }
 .calendar-cell { min-height: 120px; border: 1px solid var(--border); border-radius: 12px; padding: 0.75rem; background: var(--bg-raised); cursor: pointer; transition: transform 0.15s, border-color 0.15s; color: var(--text); }
@@ -547,6 +548,12 @@ tr:hover td { background: var(--bg-raised); }
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
+}
+.owner-space-map {
+  height: 260px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
 }
 .btn-whatsapp { background: #16a34a; color: #fff; }
 .btn-whatsapp:hover { background: #15803d; transform: translateY(-1px); }
@@ -1321,8 +1328,37 @@ tr:hover td { background: var(--bg-raised); }
     flex: 0 0 auto;
     white-space: nowrap;
   }
+  .owner-card .space-card-top {
+    display: grid;
+    gap: 0.8rem;
+  }
+  .owner-card .space-card-top > div:last-child {
+    justify-content: flex-start !important;
+  }
+  .owner-card .space-card-top .btn {
+    flex: 1 1 130px;
+    justify-content: center;
+  }
   .calendar-cell { min-height: 90px; padding: 0.6rem; }
-  .owner-calendar { gap: 0.35rem; }
+  .owner-calendar-shell {
+    overflow-x: auto;
+    padding-bottom: 0.35rem;
+    -webkit-overflow-scrolling: touch;
+  }
+  .owner-calendar {
+    min-width: 620px;
+    gap: 0.35rem;
+  }
+  .calendar-head {
+    min-width: 0;
+    text-align: center;
+  }
+  .calendar-date {
+    font-size: 1rem;
+  }
+  .calendar-meta {
+    font-size: 0.74rem;
+  }
   .notification-item { grid-template-columns: 1fr; }
   .slot-row {
     flex-direction: column;
@@ -1334,6 +1370,9 @@ tr:hover td { background: var(--bg-raised); }
   }
   .owner-slot-btn {
     width: 100%;
+  }
+  .owner-space-map {
+    height: 220px;
   }
   .home-hero { padding-top: 3rem; }
   .home-title { max-width: 100%; }

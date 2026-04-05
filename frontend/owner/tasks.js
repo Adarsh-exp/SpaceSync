@@ -1,6 +1,8 @@
 let ownerSpaces = [];
 let editingSpaceId = null;
 let ownerSelectedLocation = { lat: null, lng: null };
+let ownerLocationMap = null;
+let ownerLocationMarker = null;
 
 function ownerSpaceModalMarkup() {
   return `
@@ -29,9 +31,11 @@ function ownerSpaceModalMarkup() {
           <div class="owner-location-picker">
             <div class="owner-location-status" id="owner-space-location-status">No location selected yet.</div>
             <div class="owner-location-actions">
-              <button type="button" class="btn btn-secondary btn-sm" id="owner-space-location-pick-btn">Use Current Location</button>
+              <button type="button" class="btn btn-secondary btn-sm" id="owner-space-location-open-btn">Select On Map</button>
               <button type="button" class="btn btn-ghost btn-sm hidden" id="owner-space-location-clear-btn">Clear Location</button>
             </div>
+            <div id="owner-space-map" class="owner-space-map hidden"></div>
+            <div class="text-muted text-xs">Tap anywhere on the map to place the location pin.</div>
           </div>
         </div>
         <div class="form-group"><label>Amenities (comma separated)</label><input type="text" id="owner-space-amenities" placeholder="Lights, Parking, Washroom" /></div>
@@ -56,7 +60,7 @@ function ensureOwnerSpaceModal() {
   modal?.addEventListener("click", event => { if (event.target === modal) closeOwnerSpaceModal(); });
   document.getElementById("owner-space-close-btn")?.addEventListener("click", closeOwnerSpaceModal);
   document.getElementById("owner-space-save-btn")?.addEventListener("click", saveOwnerSpace);
-  document.getElementById("owner-space-location-pick-btn")?.addEventListener("click", pickOwnerLocation);
+  document.getElementById("owner-space-location-open-btn")?.addEventListener("click", openOwnerLocationPicker);
   document.getElementById("owner-space-location-clear-btn")?.addEventListener("click", clearOwnerLocation);
 }
 
@@ -90,6 +94,7 @@ function openOwnerSpaceModal(spaceId = null) {
   const space = spaceId ? ownerSpaces.find(item => item.id === spaceId) : null;
   populateOwnerSpaceForm(space || null);
   document.getElementById("owner-space-modal")?.classList.remove("hidden");
+  setTimeout(() => initOwnerLocationMap(), 80);
 }
 
 function closeOwnerSpaceModal() {
@@ -112,47 +117,60 @@ function renderOwnerLocationStatus() {
 
 function clearOwnerLocation() {
   ownerSelectedLocation = { lat: null, lng: null };
+  if (ownerLocationMarker && ownerLocationMap) {
+    ownerLocationMap.removeLayer(ownerLocationMarker);
+    ownerLocationMarker = null;
+  }
   renderOwnerLocationStatus();
 }
 
-function pickOwnerLocation() {
-  if (!navigator.geolocation) {
-    toast("Geolocation is not supported on this device", "error");
-    return;
-  }
+function openOwnerLocationPicker() {
+  const mapEl = document.getElementById("owner-space-map");
+  mapEl?.classList.remove("hidden");
+  initOwnerLocationMap(true);
+}
 
-  const pickBtn = document.getElementById("owner-space-location-pick-btn");
-  const previousLabel = pickBtn?.textContent;
-  if (pickBtn) {
-    pickBtn.disabled = true;
-    pickBtn.textContent = "Fetching...";
-  }
+function initOwnerLocationMap(shouldFocus = false) {
+  const mapEl = document.getElementById("owner-space-map");
+  if (!mapEl || typeof L === "undefined") return;
 
-  navigator.geolocation.getCurrentPosition(
-    position => {
+  const hasSelectedLocation = Number.isFinite(ownerSelectedLocation.lat) && Number.isFinite(ownerSelectedLocation.lng);
+  const center = hasSelectedLocation ? [ownerSelectedLocation.lat, ownerSelectedLocation.lng] : [18.5204, 73.8567];
+  const zoom = hasSelectedLocation ? 14 : 11;
+
+  if (!ownerLocationMap) {
+    ownerLocationMap = L.map("owner-space-map").setView(center, zoom);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "OpenStreetMap",
+    }).addTo(ownerLocationMap);
+
+    ownerLocationMap.on("click", (event) => {
       ownerSelectedLocation = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
+        lat: event.latlng.lat,
+        lng: event.latlng.lng,
       };
+      if (ownerLocationMarker) {
+        ownerLocationMarker.setLatLng(event.latlng);
+      } else {
+        ownerLocationMarker = L.marker(event.latlng).addTo(ownerLocationMap);
+      }
       renderOwnerLocationStatus();
       toast("Location selected");
-      if (pickBtn) {
-        pickBtn.disabled = false;
-        pickBtn.textContent = previousLabel;
-      }
-    },
-    error => {
-      const message = error.code === error.PERMISSION_DENIED
-        ? "Location permission was denied"
-        : "Could not fetch your current location";
-      toast(message, "error");
-      if (pickBtn) {
-        pickBtn.disabled = false;
-        pickBtn.textContent = previousLabel;
-      }
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-  );
+    });
+  }
+
+  if (hasSelectedLocation) {
+    if (ownerLocationMarker) {
+      ownerLocationMarker.setLatLng(center);
+    } else {
+      ownerLocationMarker = L.marker(center).addTo(ownerLocationMap);
+    }
+  }
+
+  ownerLocationMap.invalidateSize();
+  if (shouldFocus || hasSelectedLocation) {
+    ownerLocationMap.setView(center, zoom);
+  }
 }
 
 function renderOwnerSpaceCard(space) {
@@ -167,6 +185,7 @@ function renderOwnerSpaceCard(space) {
         <div style="display:flex;gap:0.45rem;flex-wrap:wrap;justify-content:flex-end;">
           <button class="btn btn-secondary btn-sm" onclick="openOwnerSpaceModal(${space.id})">Edit</button>
           <button class="btn btn-ghost btn-sm" onclick="pickOwnerSpaceImage(${space.id})">${space.image_url ? "Change Photo" : "Upload Photo"}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteOwnerSpace(${space.id}, '${escapeOwnerLabel(space.name)}')">Delete</button>
           <input type="file" id="owner-space-image-card-${space.id}" accept="image/*" class="hidden" onchange="uploadOwnerSpaceImageForCard(${space.id})" />
         </div>
       </div>
@@ -223,6 +242,27 @@ async function saveOwnerSpace() {
     }
     toast(editingSpaceId ? "Space updated" : "Space created");
     closeOwnerSpaceModal();
+    const user = getUser();
+    if (user) await loadOwnerSpaces(user);
+  } catch (error) {
+    toast(error.message, "error");
+  }
+}
+
+function escapeOwnerLabel(value) {
+  return String(value || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+}
+
+async function deleteOwnerSpace(spaceId, spaceName) {
+  const firstConfirm = window.confirm(`Delete "${spaceName}"? This will remove the listing from users immediately.`);
+  if (!firstConfirm) return;
+
+  const secondConfirm = window.confirm(`Please confirm again: permanently delete "${spaceName}"? This action cannot be undone.`);
+  if (!secondConfirm) return;
+
+  try {
+    await ownerFetch(`/spaces/${spaceId}`, { method: "DELETE" });
+    toast("Listing deleted");
     const user = getUser();
     if (user) await loadOwnerSpaces(user);
   } catch (error) {
@@ -293,4 +333,5 @@ async function initOwnerTasks() {
 window.openOwnerSpaceModal = openOwnerSpaceModal;
 window.pickOwnerSpaceImage = pickOwnerSpaceImage;
 window.uploadOwnerSpaceImageForCard = uploadOwnerSpaceImageForCard;
+window.deleteOwnerSpace = deleteOwnerSpace;
 initOwnerTasks();
