@@ -1,175 +1,208 @@
 # SpaceSync
 
-SpaceSync is a FastAPI + HTML/CSS/JS booking platform for cricket grounds, party halls, parking, owner listings, bookings, reviews, analytics, notifications, and ML-assisted availability.
+SpaceSync is a space-booking platform for cricket grounds, party halls, parking spaces, and other bookable venues. It supports user bookings, owner-managed listings, reviews, slot blocking, analytics, notifications, listing photos, and ML-assisted pricing/recommendations.
 
-This repo is now prepared for a fully free, no-card deployment path:
+The project uses a FastAPI backend with a simple HTML/CSS/JavaScript frontend. It can run locally with SQLite, and it is prepared for a free deployment setup using Render, Firebase Hosting, Neon Postgres, and Cloudinary.
 
-- Render for the backend
-- Render Static Site for the frontend
-- Neon for PostgreSQL
-- Cloudinary for listing image uploads
+## Features
 
-That stack fits this codebase well because the app already uses FastAPI, SQLAlchemy, relational data, and owner image uploads.
+- User and owner authentication with JWT
+- Role-based access for users and space owners
+- Browse and search available spaces
+- Owner listing management with timings, contact details, photos, and map location
+- Booking flow with availability checks
+- Manual slot blocking and unblocking for owners
+- Reviews with owner replies
+- Owner notifications
+- Owner earnings and analytics pages
+- CSV booking export
+- ML endpoints for surge pricing, recommendations, and availability
 
-## Why this deployment path
-
-This project should not be moved to Firestore or a backendless setup unless you want a rewrite.
-
-The current code expects:
-
-- a Python backend
-- a relational SQL database
-- server-side auth and business logic
-- persistent image storage
-
-So the cleanest free setup is:
-
-1. Render Web Service for FastAPI
-2. Neon Postgres for the database
-3. Cloudinary Free plan for image hosting
-4. Render Static Site for the frontend
-
-## What changed in the code
-
-The deployment-related code now supports:
-
-1. Hosted Postgres via `DATABASE_URL`
-2. SSL database connections for hosted Postgres
-3. Runtime-configurable frontend API base via `frontend/js/runtime-config.js`
-4. Cloudinary uploads for owner listing photos
-5. Render deployment through `render.yaml`
-6. Local fallback uploads when no cloud storage is configured
-
-## Key files
+## Tech Stack
 
 Backend:
 
-- `backend/database.py`
-- `backend/routes/spaces.py`
-- `backend/services/storage.py`
-- `backend/requirements.txt`
+- FastAPI
+- SQLAlchemy
+- SQLite for local development
+- PostgreSQL for production
+- Pydantic
+- JWT authentication
+- scikit-learn based ML helpers
 
 Frontend:
 
-- `frontend/js/main.js`
-- `frontend/js/detail.js`
-- `frontend/js/runtime-config.js`
+- HTML
+- CSS
+- Vanilla JavaScript
+- Chart.js
+- Leaflet/OpenStreetMap
 
 Deployment:
 
-- `.env.example`
-- `render.yaml`
-- `Dockerfile`
-- `.dockerignore`
+- Render for the backend API
+- Firebase Hosting for the frontend
+- Neon for PostgreSQL
+- Cloudinary for listing image uploads
 
-## Environment variables
+## Project Structure
 
-Use `.env.example` as the template.
+```text
+spacesync/
+|-- backend/
+|   |-- routes/
+|   |-- services/
+|   |-- ml/
+|   |-- database.py
+|   |-- models.py
+|   |-- schemas.py
+|   `-- requirements.txt
+|-- frontend/
+|   |-- owner/
+|   |-- js/
+|   |-- css/
+|   `-- index.html
+|-- main.py
+|-- render.yaml
+|-- firebase.json
+|-- Dockerfile
+`-- README.md
+```
 
-Typical production values:
+## Environment Variables
+
+Create a `.env` file from `.env.example` before running the backend locally.
 
 ```env
-DATABASE_URL=postgresql://neondb_owner:YOUR_PASSWORD@YOUR_NEON_HOST/neondb?sslmode=require
-DB_SSLMODE=require
-DB_POOL_SIZE=5
-DB_MAX_OVERFLOW=10
-DB_POOL_RECYCLE=1800
-
-SECRET_KEY=replace_this_with_a_long_random_secret
+DATABASE_URL=sqlite:///./spacesync.db
+SECRET_KEY=change_this_to_a_long_secret
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 
-RAZORPAY_KEY_ID=your_razorpay_key
-RAZORPAY_KEY_SECRET=your_razorpay_secret
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
 ```
 
-Notes:
+For production with Neon, use a Postgres URL:
 
-- `DATABASE_URL` comes from Neon
-- `CLOUDINARY_*` comes from Cloudinary
-- `SECRET_KEY` must be a real secret in production
-- `DB_SSLMODE=require` is recommended for hosted Postgres
-
-## Local development
-
-### 1. Install backend dependencies
-
-```bash
-cd backend
-pip install -r requirements.txt
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@HOST/DB_NAME?sslmode=require
+DB_SSLMODE=require
 ```
 
-### 2. Create `.env`
+Do not commit real `.env` values, API keys, database passwords, or Cloudinary secrets.
 
-```bash
+## Local Setup
+
+### 1. Create and activate a virtual environment
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+### 2. Install backend dependencies
+
+```powershell
+pip install -r backend/requirements.txt
+```
+
+### 3. Create local environment file
+
+```powershell
 copy .env.example .env
 ```
 
-### 3. Run backend
+For local SQLite development, set:
 
-From project root:
+```env
+DATABASE_URL=sqlite:///./spacesync.db
+```
 
-```bash
+### 4. Start the backend
+
+```powershell
 uvicorn main:app --host 127.0.0.1 --port 8001 --reload
 ```
 
-### 4. Run frontend
+Backend docs will be available at:
 
-```bash
+```text
+http://127.0.0.1:8001/docs
+```
+
+### 5. Start the frontend
+
+Open a second terminal:
+
+```powershell
 cd frontend
 python -m http.server 3001
 ```
 
-### 5. Open app
+Frontend URL:
 
-- Frontend: `http://127.0.0.1:3001`
-- Backend docs: `http://127.0.0.1:8001/docs`
-
-## Full free deployment guide
-
-## Part 1: Create a Neon database
-
-Neon is a hosted Postgres provider and its pricing page says the Free plan is `$0` and is available with no credit card required.
-
-### Steps
-
-1. Go to Neon and create an account.
-2. Create a new project.
-3. Choose PostgreSQL.
-4. Open your project dashboard.
-5. Copy the connection string.
-
-It will look similar to:
-
-```env
-postgresql://neondb_owner:YOUR_PASSWORD@ep-xxxx-xxxx-pooler.region.aws.neon.tech/neondb?sslmode=require
+```text
+http://127.0.0.1:3001
 ```
 
-Put that into:
+## Frontend API Configuration
+
+The frontend reads the backend URL from:
+
+```text
+frontend/js/runtime-config.js
+```
+
+For local development:
+
+```js
+window.__API_BASE__ = "http://127.0.0.1:8001";
+```
+
+For deployed frontend:
+
+```js
+window.__API_BASE__ = "https://your-render-backend.onrender.com";
+```
+
+`firebase.json` disables caching for this file so API URL changes are picked up quickly after deployment.
+
+## Deployment
+
+The current low-cost deployment path is:
+
+- Backend API: Render Web Service
+- Frontend: Firebase Hosting
+- Database: Neon Postgres
+- Image uploads: Cloudinary
+
+### 1. Create the Neon database
+
+1. Create a project in Neon.
+2. Copy the pooled Postgres connection string.
+3. Add it to Render as `DATABASE_URL`.
+
+Example:
 
 ```env
-DATABASE_URL=postgresql://neondb_owner:YOUR_PASSWORD@ep-xxxx-xxxx-pooler.region.aws.neon.tech/neondb?sslmode=require
+DATABASE_URL=postgresql://neondb_owner:PASSWORD@HOST/neondb?sslmode=require
 DB_SSLMODE=require
 ```
 
-## Part 2: Create a Cloudinary account
+### 2. Create Cloudinary credentials
 
-Cloudinary Free is the best fit here for listing image uploads.
+In Cloudinary, copy these values from the dashboard:
 
-### Steps
+- Cloud name
+- API key
+- API secret
 
-1. Create a Cloudinary account.
-2. Open the product dashboard.
-3. Copy:
-   - Cloud name
-   - API key
-   - API secret
-
-Put them into env:
+Add them to Render:
 
 ```env
 CLOUDINARY_CLOUD_NAME=your_cloud_name
@@ -177,49 +210,15 @@ CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-The backend will automatically use Cloudinary first when these values are present.
+All three values must come from the same Cloudinary account. If they do not match, uploads will fail with an invalid signature error.
 
-## Part 3: Prepare the backend for Render
+### 3. Deploy the backend on Render
 
-The repo already includes:
+Render can use the included `render.yaml`, or you can create the service manually.
 
-- `render.yaml`
-- `Dockerfile`
+Manual settings:
 
-You can deploy from the Render dashboard or from the repo blueprint.
-
-### Backend env vars needed on Render
-
-Set these in your Render backend service:
-
-- `DATABASE_URL`
-- `DB_SSLMODE=require`
-- `SECRET_KEY`
-- `ALGORITHM=HS256`
-- `ACCESS_TOKEN_EXPIRE_MINUTES=30`
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
-- `RAZORPAY_KEY_ID`
-- `RAZORPAY_KEY_SECRET`
-
-## Part 4: Deploy the backend to Render
-
-Render's getting-started docs say their free deploy flow uses free resources and no payment is required.
-
-### Steps
-
-1. Push this repo to GitHub.
-2. Sign in to Render.
-3. Click `New`.
-4. Choose `Web Service`.
-5. Connect your GitHub repo.
-6. Select this project.
-7. Use these settings:
-
-- Name: `spacesync-api`
 - Runtime: `Python 3`
-- Root directory: leave blank if deploying from repo root
 - Build command:
 
 ```bash
@@ -232,192 +231,171 @@ pip install -r backend/requirements.txt && python -m backend.ml.train_surge_pric
 uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
 
-8. Add the env vars listed above.
-9. Deploy the service.
+Required Render environment variables:
 
-After deployment, Render will give you a backend URL like:
+- `DATABASE_URL`
+- `DB_SSLMODE`
+- `SECRET_KEY`
+- `ALGORITHM`
+- `ACCESS_TOKEN_EXPIRE_MINUTES`
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+
+Optional:
+
+- `RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
+
+After deployment, Render will provide a backend URL similar to:
 
 ```text
 https://spacesync-api.onrender.com
 ```
 
-Keep that URL.
+### 4. Point the frontend to Render
 
-## Part 5: Point the frontend to the deployed backend
+Update:
 
-Before deploying the frontend, edit:
-
-- `frontend/js/runtime-config.js`
-
-Change it from:
-
-```js
-window.__API_BASE__ = window.__API_BASE__ || "http://localhost:8001";
+```text
+frontend/js/runtime-config.js
 ```
 
-to:
+Set it to your deployed backend:
 
 ```js
 window.__API_BASE__ = "https://spacesync-api.onrender.com";
 ```
 
-Use your real backend URL.
+### 5. Deploy the frontend on Firebase Hosting
 
-This is required because:
+Login once:
 
-- all frontend `fetch()` calls use it
-- WebSocket URLs are built from it too
-
-## Part 6: Deploy the frontend for free
-
-### Option A: Render Static Site
-
-This is the simplest because both frontend and backend stay on Render.
-
-Steps:
-
-1. In Render, click `New`.
-2. Choose `Static Site`.
-3. Connect the same GitHub repo.
-4. Use these settings:
-
-- Name: `spacesync-frontend`
-- Root directory: `frontend`
-- Build command: leave empty
-- Publish directory: `.`
-
-5. Deploy.
-
-Your frontend URL will look like:
-
-```text
-https://spacesync-frontend.onrender.com
+```powershell
+firebase login
 ```
 
-### Option B: Vercel or Netlify
+Select or add the Firebase project:
 
-You can also host the `frontend/` folder on Vercel or Netlify if you prefer those interfaces.
+```powershell
+firebase use --add
+```
 
-If you do that, keep `runtime-config.js` pointing to your Render backend URL.
+Deploy hosting:
 
-## Part 7: First production checks
+```powershell
+firebase deploy --only hosting
+```
 
-After both deployments:
+Firebase will give a URL like:
 
-1. Open the frontend URL.
-2. Register a normal user.
-3. Login as the normal user.
-4. Register an owner.
-5. Login as the owner.
-6. Create a listing.
-7. Upload a listing photo.
-8. Open the listing as a user.
-9. Create a booking.
-10. Add a review.
+```text
+https://your-project.web.app
+```
 
-## How image upload works now
+## Manual Redeploy
 
-The backend storage order is now:
+After changing code:
 
-1. Cloudinary, if `CLOUDINARY_*` env vars are present
-2. Firebase/Google bucket, if configured
-3. Supabase Storage, if configured
-4. local `/uploads` fallback
+```powershell
+git add .
+git commit -m "Describe the change"
+git push
+```
 
-For production on free hosting, Cloudinary is the recommended path.
+Backend changes:
 
-## How to update after deployment
+- Render redeploys from GitHub.
+- You can also click `Manual Deploy` in Render.
 
-Yes, you can keep changing the code after deployment.
+Frontend changes:
 
-### If you change backend code
+```powershell
+firebase deploy --only hosting
+```
 
-Push to GitHub again.
-Render will redeploy the backend service.
+If only the API URL changed, make sure `frontend/js/runtime-config.js` has the correct backend URL before deploying Firebase again.
 
-### If you change frontend code
+## Production Checklist
 
-Push to GitHub again.
-Render Static Site will redeploy the frontend.
-
-### If you change both
-
-Push both changes.
-Both services will redeploy.
-
-### If you change database models
-
-You may need to restart the backend and verify the tables/columns are created correctly in Neon.
+- Rotate any database password that was shared publicly.
+- Set a strong `SECRET_KEY` in Render.
+- Confirm `DATABASE_URL` points to Neon, not local SQLite.
+- Confirm Cloudinary credentials are correct.
+- Confirm `frontend/js/runtime-config.js` points to the deployed Render API.
+- Create one owner account and one user account.
+- Add a listing as owner.
+- Upload a listing photo.
+- Open the listing as a user.
+- Make a booking.
+- Add, edit, and delete a review.
+- Test slot blocking from the owner calendar.
 
 ## Troubleshooting
 
-### Frontend still calls localhost
+### `uvicorn` is not recognized
+
+Install dependencies inside the active virtual environment:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+pip install -r backend/requirements.txt
+python -m uvicorn main:app --host 127.0.0.1 --port 8001 --reload
+```
+
+### Backend cannot parse `DATABASE_URL`
+
+Check that the value starts directly with `postgresql://` or `sqlite:///`.
+
+Incorrect:
+
+```env
+DATABASE_URL=DATABASE_URL=postgresql://...
+```
+
+Correct:
+
+```env
+DATABASE_URL=postgresql://...
+```
+
+### Frontend says `Failed to fetch`
 
 Check:
 
-- `frontend/js/runtime-config.js`
+- backend service is running
+- Render backend URL opens in the browser
+- `frontend/js/runtime-config.js` has the correct deployed API URL
+- Firebase Hosting has been redeployed after changing the API URL
 
-It must contain your real deployed backend URL before frontend deployment.
+### Cloudinary upload fails with `Invalid Signature`
 
-### Owner image upload fails
-
-Check:
+Recheck all three Cloudinary values in Render:
 
 - `CLOUDINARY_CLOUD_NAME`
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
 
-If these are missing, upload falls back away from Cloudinary.
+Remove extra spaces or quotes. Redeploy the Render service after updating them.
 
-### Backend cannot connect to database
+### Owner or browse page looks blank after deploy
 
-Check:
+This is usually an old cached frontend file.
 
-- `DATABASE_URL`
-- Neon password
-- host name
-- SSL mode
+Try:
 
-### Render backend builds but app does not start
-
-Check:
-
-- build logs
-- start logs
-- env vars
-- whether `uvicorn main:app --host 0.0.0.0 --port $PORT` is exactly set
-
-## Quick command summary
-
-### Local backend
-
-```bash
-cd backend
-pip install -r requirements.txt
-cd ..
-uvicorn main:app --host 127.0.0.1 --port 8001 --reload
+```powershell
+firebase deploy --only hosting
 ```
 
-### Local frontend
+Then open the site in an incognito window or add a cache-busting query string:
 
-```bash
-cd frontend
-python -m http.server 3001
+```text
+https://your-project.web.app/?v=latest
 ```
 
-## Official references
+## Notes
 
-- Render docs: [https://render.com/docs/your-first-deploy](https://render.com/docs/your-first-deploy)
-- Neon pricing: [https://neon.com/pricing](https://neon.com/pricing)
-- Cloudinary free plan: [https://cloudinary.com/documentation/developer_onboarding_faq_free_plan](https://cloudinary.com/documentation/developer_onboarding_faq_free_plan)
-
-## Best free stack for this project
-
-If you want everything free and no card for now, use:
-
-- Backend: Render Web Service
-- Frontend: Render Static Site
-- Database: Neon Free
-- Images: Cloudinary Free
-
-That is the most practical deployment path for this current codebase without rewriting it.
+- Razorpay support can be added later without changing the current deployment plan.
+- The backend still supports local uploads as a fallback, but Cloudinary is the recommended option for hosted deployments.
+- Firebase is used here only for static hosting. The backend, auth, and database are still handled by FastAPI and SQLAlchemy.
